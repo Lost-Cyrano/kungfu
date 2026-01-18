@@ -25,6 +25,10 @@
             font-weight: bold;
             color: #d23f31;
         }
+        .athlete-name.has-note {
+            color: #34a853;
+            font-weight: bold;
+        }
         .notes-input { 
             width: 150px; 
             padding: 8px 10px; 
@@ -83,22 +87,33 @@
                     nameSpan.className = 'athlete-name';
                     nameSpan.textContent = athleteName;
                     
-                    if (athleteName.includes('GAVRILOVIC Nino') || 
-                        athleteName.includes('LAURENS Koleen') || 
-                        athleteName.includes('DAUTREMER Swann')) {
-                        nameSpan.classList.add('highlight');
-                    }
+                    const notesKey = `${catKey}_${athleteKey}`;
+                    
+                    const updateNoteStatus = (noteValue) => {
+                        if (noteValue && noteValue.trim() !== '') {
+                            nameSpan.classList.add('has-note');
+                        } else {
+                            nameSpan.classList.remove('has-note');
+                        }
+                        
+                        if (athleteName.includes('GAVRILOVIC Nino') || 
+                            athleteName.includes('LAURENS Koleen') || 
+                            athleteName.includes('DAUTREMER Swann')) {
+                            nameSpan.classList.add('highlight');
+                        }
+                    };
                     
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.className = 'notes-input';
                     input.placeholder = 'Notes...';
                     
-                    const notesKey = `${catKey}_${athleteKey}`;
                     const notesRef = database.ref(`notes/${notesKey}`);
                     
                     notesRef.on('value', (snapshot) => {
-                        input.value = snapshot.val() || '';
+                        const noteValue = snapshot.val();
+                        input.value = noteValue || '';
+                        updateNoteStatus(noteValue);
                     });
                     
                     input.addEventListener('input', () => {
