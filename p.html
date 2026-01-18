@@ -58,7 +58,14 @@
             
             if (!data) return;
             
-            Object.keys(data).forEach(catKey => {
+            const sortedCategories = Object.keys(data)
+                .sort((a, b) => {
+                    const numA = parseInt(a.replace('cat', ''));
+                    const numB = parseInt(b.replace('cat', ''));
+                    return numA - numB;
+                });
+            
+            sortedCategories.forEach(catKey => {
                 const categoryDiv = document.createElement('div');
                 categoryDiv.className = 'category';
                 
