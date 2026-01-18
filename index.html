@@ -40,40 +40,41 @@ LAURENS Koleen Masculin</textarea>
         function processAndSend() {
             const input = document.getElementById('inputData').value;
             const lines = input.split('\n');
-            let result = {};
-            let currentCat = null;
-            let catIndex = 1;
+            let result = [];
+            let currentCat = [];
+            let catNumber = 1;
 
-            lines.forEach(line => {
-                line = line.trim();
-                if (line === '') {
-                    if (currentCat && currentCat.length > 0) {
-                        result[`cat${catIndex}`] = currentCat;
-                        catIndex++;
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (line === '' || i === lines.length - 1) {
+                    // Fin de catégorie ou dernière ligne
+                    if (i === lines.length - 1 && line !== '') {
+                        currentCat.push(line);
                     }
-                    currentCat = [];
-                } else if (currentCat !== null) {
-                    currentCat.push(line);
+                    
+                    if (currentCat.length > 0) {
+                        // Convertir le tableau d'athlètes en objet avec ordre préservé
+                        const catObj = {};
+                        currentCat.forEach((athlete, idx) => {
+                            catObj[`nomAthlete${idx + 1}`] = athlete;
+                        });
+                        result.push(catObj);
+                        catNumber++;
+                        currentCat = [];
+                    }
                 } else {
-                    currentCat = [line];
+                    currentCat.push(line);
                 }
-            });
-
-            if (currentCat && currentCat.length > 0) {
-                result[`cat${catIndex}`] = currentCat;
             }
 
-            const formattedResult = {};
-            Object.keys(result).forEach(catKey => {
-                const athletes = result[catKey];
-                const catData = {};
-                athletes.forEach((athlete, idx) => {
-                    catData[`nomAthlete${idx + 1}`] = athlete;
-                });
-                formattedResult[catKey] = catData;
+            // Convertir l'array en objet pour Firebase avec ordre préservé
+            const firebaseData = {};
+            result.forEach((cat, index) => {
+                firebaseData[`cat${index + 1}`] = cat;
             });
 
-            database.ref('/').set(formattedResult)
+            database.ref('/').set(firebaseData)
                 .then(() => {
                     loadData();
                 })
