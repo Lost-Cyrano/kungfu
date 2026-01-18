@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kung Fu Sète - Gestion des Catégories et Athlètes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #666;
+            margin: 15px 0;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .category-list, .athlete-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .category-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .athlete-item {
+            padding: 10px 15px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .category-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .athlete-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #4facfe;
+        }
+
+        .instructions h4 {
+            color: #2c5282;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+            color: #555;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .database-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏆 Kung Fu Sète - Gestion de la Compétition</h1>
+    
+    <div class="container">
+        <!-- Section d'ajout des catégories et athlètes -->
+        <div class="card">
+            <h2>📝 Ajouter des Catégories et Athlètes</h2>
+            
+            <div class="instructions">
+                <h4>Format d'entrée :</h4>
+                <ul>
+                    <li><strong>Nouvelle catégorie</strong> : Saut de ligne (ligne vide)</li>
+                    <li><strong>Nouvel athlète</strong> : Retour à la ligne</li>
+                </ul>
+                <p><strong>Exemple :</strong><br>Catégorie 1<br>Athlète 1<br>Athlète 2<br><br>Catégorie 2<br>Athlète 3</p>
+            </div>
+
+            <div class="input-group">
+                <label for="categoriesInput">Entrez les catégories et athlètes :</label>
+                <textarea id="categoriesInput" placeholder="CORDA Gohan Duilian&#10;&#10;GAVRILOVIC Nino Masculin&#10;LAURENS Koleen Masculin"></textarea>
+            </div>
+
+            <div class="actions">
+                <button onclick="importToFirebase()" class="btn">
+                    <span>📤 Importer vers Firebase</span>
+                </button>
+                <button onclick="clearInput()" class="btn btn-secondary">
+                    <span>🗑️ Effacer</span>
+                </button>
+            </div>
+
+            <div id="status" class="status"></div>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Envoi en cours vers Firebase...</p>
+            </div>
+        </div>
+
+        <!-- Section visualisation -->
+        <div class="card">
+            <h2>👁️ Visualisation des Données</h2>
+            
+            <div class="database-stats" id="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="categoryCount">0</div>
+                    <div class="stat-label">Catégories</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="athleteCount">0</div>
+                    <div class="stat-label">Athlètes</div>
+                </div>
+            </div>
+
+            <h3>📊 Catégories et Athlètes :</h3>
+            <div id="categoriesList" class="category-list">
+                <p style="text-align: center; color: #666; padding: 20px;">
+                    Aucune donnée chargée. Cliquez sur "Charger depuis Firebase".
+                </p>
+            </div>
+
+            <div class="actions">
+                <button onclick="loadFromFirebase()" class="btn btn-success">
+                    <span>🔄 Charger depuis Firebase</span>
+                </button>
+                <button onclick="clearFirebase()" class="btn btn-secondary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <span>⚠️ Effacer la base de données</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            databaseURL: "https://kungfusete-default-rtdb.europe-west1.firebasedatabase.app/"
+        };
+
+        // Initialiser Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${isError ? 'error' : 'success'}`;
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function clearInput() {
+            document.getElementById('categoriesInput').value = '';
+        }
+
+        function parseInput() {
+            const input = document.getElementById('categoriesInput').value.trim();
+            const lines = input.split('\n');
+            
+            let categories = [];
+            let currentCategory = null;
+            
+            for (let line of lines) {
+                line = line.trim();
+                
+                if (line === '') {
+                    // Ligne vide = nouvelle catégorie
+                    if (currentCategory) {
+                        categories.push(currentCategory);
+                    }
+                    currentCategory = {
+                        name: '',
+                        athletes: []
+                    };
+                } else if (currentCategory === null) {
+                    // Première catégorie
+                    currentCategory = {
+                        name: line,
+                        athletes: []
+                    };
+                } else if (currentCategory.name === '') {
+                    // Nom de la catégorie
+                    currentCategory.name = line;
+                } else {
+                    // Athlète
+                    currentCategory.athletes.push(line);
+                }
+            }
+            
+            // Ajouter la dernière catégorie
+            if (currentCategory && currentCategory.name !== '') {
+                categories.push(currentCategory);
+            }
+            
+            return categories;
+        }
+
+        function importToFirebase() {
+            const categories = parseInput();
+            
+            if (categories.length === 0) {
+                showStatus('❌ Aucune catégorie trouvée dans l\'entrée.', true);
+                return;
+            }
+            
+            showLoading(true);
+            
+            // Calculer l'ordre des catégories
+            categories.forEach((category, index) => {
+                category.order = index + 1;
+            });
+            
+            // Référence à la base de données
+            const dbRef = database.ref('/');
+            
+            // Structure des données
+            const data = {
+                categories: {}
+            };
+            
+            categories.forEach((category, index) => {
+                const categoryId = `category_${Date.now()}_${index}`;
+                data.categories[categoryId] = {
+                    name: category.name,
+                    order: category.order,
+                    athletes: category.athletes.map((athlete, athleteIndex) => ({
+                        id: `athlete_${Date.now()}_${index}_${athleteIndex}`,
+                        name: athlete,
+                        order: athleteIndex + 1,
+                        notes: {},
+                        status: 'en_attente', // en_attente, en_cours, termine
+                        currentRound: 1
+                    }))
+                };
+            });
+            
+            // Envoyer à Firebase
+            dbRef.set(data)
+                .then(() => {
+                    showLoading(false);
+                    showStatus(`✅ ${categories.length} catégorie(s) et ${categories.reduce((sum, cat) => sum + cat.athletes.length, 0)} athlète(s) importés avec succès !`);
+                    
+                    // Recharger l'affichage
+                    setTimeout(loadFromFirebase, 1000);
+                })
+                .catch((error) => {
+                    showLoading(false);
+                    showStatus(`❌ Erreur lors de l'importation : ${error.message}`, true);
+                });
+        }
+
+        function loadFromFirebase() {
+            showLoading(true);
+            
+            database.ref('/').once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    showLoading(false);
+                    
+                    if (!data || !data.categories) {
+                        document.getElementById('categoriesList').innerHTML = 
+                            '<p style="text-align: center; color: #666; padding: 20px;">Aucune donnée dans la base de données.</p>';
+                        updateStats(0, 0);
+                        return;
+                    }
+                    
+                    displayCategories(data.categories);
+                    updateStats(Object.keys(data.categories).length, 
+                        Object.values(data.categories).reduce((sum, cat) => sum + (cat.athletes ? cat.athletes.length : 0), 0));
+                })
+                .catch((error) => {
+                    showLoading(false);
+                    showStatus(`❌ Erreur lors du chargement : ${error.message}`, true);
+                });
+        }
+
+        function displayCategories(categories) {
+            const container = document.getElementById('categoriesList');
+            
+            if (!categories || Object.keys(categories).length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Aucune catégorie dans la base de données.</p>';
+                return;
+            }
+            
+            // Trier les catégories par ordre
+            const sortedCategories = Object.entries(categories)
+                .sort(([, a], [, b]) => (a.order || 0) - (b.order || 0));
+            
+            let html = '';
+            
+            sortedCategories.forEach(([categoryId, category]) => {
+                const athleteCount = category.athletes ? category.athletes.length : 0;
+                
+                html += `
+                    <div class="category-item">
+                        <div class="category-header">
+                            <div class="category-name">${category.name}</div>
+                            <div class="athlete-count">${athleteCount} athlète(s)</div>
+                        </div>
+                        <div class="athlete-list">
+                `;
+                
+                if (category.athletes && category.athletes.length > 0) {
+                    // Trier les athlètes par ordre
+                    const sortedAthletes = category.athletes.sort((a, b) => (a.order || 0) - (b.order || 0));
+                    
+                    sortedAthletes.forEach((athlete, index) => {
+                        const statusColors = {
+                            'en_attente': '#f39c12',
+                            'en_cours': '#3498db',
+                            'termine': '#2ecc71'
+                        };
+                        const statusText = {
+                            'en_attente': 'En attente',
+                            'en_cours': 'En cours',
+                            'termine': 'Terminé'
+                        };
+                        
+                        html += `
+                            <div class="athlete-item">
+                                <strong>${index + 1}.</strong> ${athlete.name}
+                                <span style="float: right; color: ${statusColors[athlete.status] || '#95a5a6'}; font-size: 0.9em;">
+                                    ${statusText[athlete.status] || athlete.status}
+                                </span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += '<p style="color: #999; text-align: center;">Aucun athlète dans cette catégorie</p>';
+                }
+                
+                html += '</div></div>';
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateStats(categoryCount, athleteCount) {
+            document.getElementById('categoryCount').textContent = categoryCount;
+            document.getElementById('athleteCount').textContent = athleteCount;
+        }
+
+        function clearFirebase() {
+            if (confirm('⚠️ ATTENTION : Cette action va supprimer TOUTES les données de la base de données. Êtes-vous sûr ?')) {
+                showLoading(true);
+                
+                database.ref('/').remove()
+                    .then(() => {
+                        showLoading(false);
+                        showStatus('✅ Base de données effacée avec succès !');
+                        document.getElementById('categoriesList').innerHTML = 
+                            '<p style="text-align: center; color: #666; padding: 20px;">Aucune donnée dans la base de données.</p>';
+                        updateStats(0, 0);
+                    })
+                    .catch((error) => {
+                        showLoading(false);
+                        showStatus(`❌ Erreur lors de la suppression : ${error.message}`, true);
+                    });
+            }
+        }
+
+        // Charger les données au démarrage
+        window.onload = loadFromFirebase;
+    </script>
+</body>
+</html>
