@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kung Fu Sète - Gestion des Passages</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #1a2980;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #666;
+            margin: 15px 0;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #1a2980;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(26, 41, 128, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f46b45 0%, #eea849 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .category-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .category-item {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #1a2980;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .category-name {
+            font-weight: bold;
+            color: #1a2980;
+            font-size: 1.3em;
+            font-style: italic;
+        }
+
+        .category-index {
+            background: #1a2980;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .athlete-list {
+            margin-top: 15px;
+        }
+
+        .athlete-item {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            border-radius: 8px;
+            border-left: 3px solid #26d0ce;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .athlete-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .athlete-status {
+            font-size: 0.85em;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-weight: 500;
+        }
+
+        .status-waiting {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-active {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status-done {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a2980;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #1a2980;
+        }
+
+        .instructions h4 {
+            color: #1a2980;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+            color: #555;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .database-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #856404;
+        }
+
+        .warning-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .example-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <h1>🥋 Kung Fu Sète - Gestion des Passages</h1>
+    
+    <div class="container">
+        <!-- Section d'importation -->
+        <div class="card">
+            <h2>📤 Importer les Passages</h2>
+            
+            <div class="warning-box">
+                <h4>⚠️ Attention : Effacement des données existantes</h4>
+                <p>L'importation va SUPPRIMER TOUTES les données existantes dans Firebase et les remplacer par les nouvelles.</p>
+            </div>
+            
+            <div class="instructions">
+                <h4>Format d'entrée :</h4>
+                <ul>
+                    <li><strong>Premier athlète d'une catégorie</strong> : Marque le début d'une nouvelle catégorie</li>
+                    <li><strong>Nouvel athlète</strong> : Retour à la ligne</li>
+                    <li><strong>Nouvelle catégorie</strong> : Saut de ligne (ligne vide)</li>
+                </ul>
+            </div>
+
+            <div class="example-box">
+CORDA Gohan Duilian
+
+GAVRILOVIC Nino Masculin
+LAURENS Koleen Masculin
+
+DUPONT Jean Taolu
+DURAND Marie Taolu
+            </div>
+
+            <div class="input-group">
+                <label for="categoriesInput">Liste des athlètes par catégorie :</label>
+                <textarea id="categoriesInput" placeholder="Entrez vos données ici..."></textarea>
+            </div>
+
+            <div class="actions">
+                <button onclick="importToFirebase()" class="btn">
+                    <span>🔥 Importer et Remplacer</span>
+                </button>
+                <button onclick="clearInput()" class="btn btn-warning">
+                    <span>🗑️ Effacer l'entrée</span>
+                </button>
+                <button onclick="loadExample()" class="btn btn-success">
+                    <span>📋 Exemple</span>
+                </button>
+            </div>
+
+            <div id="status" class="status"></div>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Traitement en cours...</p>
+            </div>
+        </div>
+
+        <!-- Section visualisation -->
+        <div class="card">
+            <h2>👁️ Visualisation en Direct</h2>
+            
+            <div class="database-stats" id="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="categoryCount">0</div>
+                    <div class="stat-label">Catégories</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="athleteCount">0</div>
+                    <div class="stat-label">Athlètes</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="currentAthlete">0</div>
+                    <div class="stat-label">En cours</div>
+                </div>
+            </div>
+
+            <div id="categoriesList" class="category-list">
+                <div class="empty-state">
+                    <div style="font-size: 3em; margin-bottom: 15px; opacity: 0.5;">🥋</div>
+                    <h3>Aucune donnée</h3>
+                    <p>Importez des données pour commencer</p>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button onclick="loadFromFirebase()" class="btn">
+                    <span>🔄 Actualiser</span>
+                </button>
+                <button onclick="clearFirebase()" class="btn btn-warning">
+                    <span>⚠️ Vider Firebase</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            databaseURL: "https://kungfusete-default-rtdb.europe-west1.firebasedatabase.app/"
+        };
+
+        // Initialiser Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${isError ? 'error' : 'success'}`;
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function clearInput() {
+            document.getElementById('categoriesInput').value = '';
+        }
+
+        function loadExample() {
+            document.getElementById('categoriesInput').value = 
+`CORDA Gohan Duilian
+
+GAVRILOVIC Nino Masculin
+LAURENS Koleen Masculin
+
+DUPONT Jean Taolu
+DURAND Marie Taolu
+MARTIN Sophie Taolu
+
+LEE Bruce Formes
+CHAN Jackie Formes`;
+        }
+
+        function parseInput() {
+            const input = document.getElementById('categoriesInput').value.trim();
+            const lines = input.split('\n');
+            
+            let categories = [];
+            let currentCategory = null;
+            let categoryIndex = 1;
+            
+            for (let line of lines) {
+                line = line.trim();
+                
+                if (line === '') {
+                    // Ligne vide = préparer une nouvelle catégorie
+                    if (currentCategory !== null && currentCategory.athletes.length > 0) {
+                        categories.push(currentCategory);
+                    }
+                    currentCategory = {
+                        id: `category_${categoryIndex}`,
+                        order: categoryIndex,
+                        athletes: []
+                    };
+                    categoryIndex++;
+                } else {
+                    // Première ligne d'une catégorie ou athlète
+                    if (currentCategory === null) {
+                        // Première catégorie
+                        currentCategory = {
+                            id: `category_${categoryIndex}`,
+                            order: categoryIndex,
+                            athletes: []
+                        };
+                        categoryIndex++;
+                    }
+                    
+                    // Ajouter l'athlète
+                    const athleteId = `athlete_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    currentCategory.athletes.push({
+                        id: athleteId,
+                        name: line,
+                        order: currentCategory.athletes.length + 1,
+                        notes: {},
+                        status: 'waiting',
+                        currentRound: 1,
+                        totalScore: 0
+                    });
+                }
+            }
+            
+            // Ajouter la dernière catégorie si elle existe
+            if (currentCategory !== null && currentCategory.athletes.length > 0) {
+                categories.push(currentCategory);
+            }
+            
+            return categories;
+        }
+
+        function importToFirebase() {
+            const categories = parseInput();
+            
+            if (categories.length === 0) {
+                showStatus('❌ Aucune catégorie valide trouvée. Vérifiez le format.', true);
+                return;
+            }
+            
+            showLoading(true);
+            
+            // Créer la structure de données
+            const timestamp = Date.now();
+            const data = {
+                categories: {},
+                metadata: {
+                    lastUpdated: timestamp,
+                    totalCategories: categories.length,
+                    totalAthletes: categories.reduce((sum, cat) => sum + cat.athletes.length, 0)
+                }
+            };
+            
+            // Remplir les catégories
+            categories.forEach(category => {
+                // Pour chaque catégorie, marquer le premier athlète comme actif
+                if (category.athletes.length > 0) {
+                    category.athletes[0].status = 'active';
+                }
+                
+                data.categories[category.id] = {
+                    order: category.order,
+                    athletes: category.athletes.reduce((acc, athlete) => {
+                        acc[athlete.id] = athlete;
+                        return acc;
+                    }, {}),
+                    createdAt: timestamp
+                };
+            });
+            
+            // Écraser TOUTES les données existantes dans Firebase
+            const dbRef = database.ref('/');
+            
+            dbRef.set(data)
+                .then(() => {
+                    showLoading(false);
+                    const totalAthletes = categories.reduce((sum, cat) => sum + cat.athletes.length, 0);
+                    showStatus(`✅ ${categories.length} catégorie(s) créées avec ${totalAthletes} athlète(s)`);
+                    
+                    // Mettre à jour l'affichage
+                    setTimeout(loadFromFirebase, 1000);
+                })
+                .catch((error) => {
+                    showLoading(false);
+                    showStatus(`❌ Erreur : ${error.message}`, true);
+                });
+        }
+
+        function loadFromFirebase() {
+            showLoading(true);
+            
+            database.ref('/').once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    showLoading(false);
+                    
+                    if (!data || !data.categories) {
+                        displayEmptyState();
+                        updateStats(0, 0, 0);
+                        return;
+                    }
+                    
+                    displayCategories(data.categories);
+                    updateStats(
+                        Object.keys(data.categories).length,
+                        calculateTotalAthletes(data.categories),
+                        calculateActiveAthletes(data.categories)
+                    );
+                })
+                .catch((error) => {
+                    showLoading(false);
+                    showStatus(`❌ Erreur : ${error.message}`, true);
+                });
+        }
+
+        function calculateTotalAthletes(categories) {
+            return Object.values(categories).reduce((sum, category) => {
+                return sum + (category.athletes ? Object.keys(category.athletes).length : 0);
+            }, 0);
+        }
+
+        function calculateActiveAthletes(categories) {
+            return Object.values(categories).reduce((sum, category) => {
+                if (!category.athletes) return sum;
+                return sum + Object.values(category.athletes).filter(a => a.status === 'active').length;
+            }, 0);
+        }
+
+        function displayCategories(categories) {
+            const container = document.getElementById('categoriesList');
+            
+            if (!categories || Object.keys(categories).length === 0) {
+                displayEmptyState();
+                return;
+            }
+            
+            // Trier les catégories par ordre
+            const sortedCategories = Object.entries(categories)
+                .sort(([, a], [, b]) => (a.order || 0) - (b.order || 0));
+            
+            let html = '';
+            
+            sortedCategories.forEach(([categoryId, category], catIndex)
